@@ -1,8 +1,12 @@
 use itertools::Itertools;
 
+#[derive(Default)]
 pub struct Day1 {}
 
-impl crate::aoc::AoCSolution<Vec<i32>, usize> for Day1 {
+impl crate::aoc::AoCSolution for Day1 {
+    type ConvertedType = Vec<i32>;
+    type ReturnType = usize;
+
     fn day(&self) -> usize {
         1
     }

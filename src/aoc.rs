@@ -6,21 +6,21 @@ use std::path::Path;
 
 use std::io::prelude::*;
 
-pub trait AoCSolution<ConvertedType, ReturnType>
-where
-    ReturnType: std::fmt::Display,
-{
+pub trait AoCSolution {
+    type ConvertedType;
+    type ReturnType;
+
     fn year(&self) -> usize {
         2021
     }
 
     fn day(&self) -> usize;
 
-    fn convert(&self, input: &str) -> ConvertedType;
+    fn convert(&self, input: &str) -> Self::ConvertedType;
 
-    fn part1(&self, input: &ConvertedType) -> ReturnType;
+    fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType;
 
-    fn part2(&self, input: &ConvertedType) -> ReturnType;
+    fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType;
 
     fn input_path(&self) -> String {
         format!("input/{}/day{}.txt", self.year(), self.day())
@@ -80,9 +80,14 @@ where
             .expect("Something went wrong reading input path for this day?");
     }
 
-    fn run(&self) {
-        let converted = self.convert(&self.input());
-        println!("Part 1: {}", self.part1(&converted));
-        println!("Part 2: {}", self.part2(&converted));
+    fn run()
+    where
+        Self::ReturnType: std::fmt::Display,
+        Self: std::default::Default,
+    {
+        let day = Self::default();
+        let converted = day.convert(&day.input());
+        println!("Part 1: {}", day.part1(&converted));
+        println!("Part 2: {}", day.part2(&converted));
     }
 }

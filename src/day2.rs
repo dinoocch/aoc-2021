@@ -1,5 +1,4 @@
-use itertools::Itertools;
-
+#[derive(Default)]
 pub struct Day2 {}
 
 pub enum Direction {
@@ -8,7 +7,10 @@ pub enum Direction {
     Up(i32),
 }
 
-impl crate::aoc::AoCSolution<Vec<Direction>, i32> for Day2 {
+impl crate::aoc::AoCSolution for Day2 {
+    type ConvertedType = Vec<Direction>;
+    type ReturnType = i32;
+
     fn day(&self) -> usize {
         2
     }
