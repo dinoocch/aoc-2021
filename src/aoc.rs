@@ -10,11 +10,8 @@ pub trait AoCSolution {
     type ConvertedType;
     type ReturnType;
 
-    fn year(&self) -> usize {
-        2021
-    }
-
-    fn day(&self) -> usize;
+    const YEAR: usize = 2021;
+    const DAY: usize;
 
     fn convert(&self, input: &str) -> Self::ConvertedType;
 
@@ -23,7 +20,7 @@ pub trait AoCSolution {
     fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType;
 
     fn input_path(&self) -> String {
-        format!("input/{}/day{}.txt", self.year(), self.day())
+        format!("input/{}/day{}.txt", Self::YEAR, Self::DAY)
     }
 
     fn download_input(&self) {
@@ -42,8 +39,8 @@ pub trait AoCSolution {
         let resp = client
             .get(format!(
                 "https://adventofcode.com/{}/day/{}/input",
-                self.year(),
-                self.day()
+                Self::YEAR,
+                Self::DAY
             ))
             .header(COOKIE, format!("session={}", session_token.trim()))
             .send();

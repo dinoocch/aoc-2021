@@ -11,9 +11,7 @@ impl crate::aoc::AoCSolution for Day2 {
     type ConvertedType = Vec<Direction>;
     type ReturnType = i32;
 
-    fn day(&self) -> usize {
-        2
-    }
+    const DAY: usize = 2;
 
     fn convert(&self, input: &str) -> Vec<Direction> {
         input

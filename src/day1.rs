@@ -7,9 +7,7 @@ impl crate::aoc::AoCSolution for Day1 {
     type ConvertedType = Vec<i32>;
     type ReturnType = usize;
 
-    fn day(&self) -> usize {
-        1
-    }
+    const DAY: usize = 1;
 
     fn convert(&self, input: &str) -> Vec<i32> {
         input
