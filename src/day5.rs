@@ -1,11 +1,34 @@
 use regex::Regex;
-use std::cmp;
 use std::collections::HashMap;
 
 #[derive(Copy, Default, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Point {
     x: usize,
     y: usize,
+}
+
+impl Point {
+    fn points_between(&self, other: &Point) -> Vec<Point> {
+        let mut points = vec![];
+        let mut current_point = self.to_owned();
+        loop {
+            points.push(current_point.to_owned());
+            if current_point.x == other.x && current_point.y == other.y {
+                break;
+            }
+            if self.x < other.x {
+                current_point.x += 1;
+            } else if self.x > other.x {
+                current_point.x -= 1;
+            }
+            if self.y < other.y {
+                current_point.y += 1;
+            } else if self.y > other.y {
+                current_point.y -= 1;
+            }
+        }
+        points
+    }
 }
 
 #[derive(Default)]
@@ -43,73 +66,23 @@ impl crate::aoc::AoCSolution for Day5 {
     }
 
     fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut marked: HashMap<(usize, usize), usize> = HashMap::new();
-        for (from, to) in input.iter() {
-            if from.x != to.x && from.y != to.y {
-                continue;
-            }
-
-            let points = if from.x == to.x && from.y == to.y {
-                vec![(from.x, from.y)]
-            } else if from.x == to.x {
-                let min_value = cmp::min(from.y, to.y);
-                let max_value = cmp::max(from.y, to.y);
-                (min_value..=max_value).map(|y| (from.x, y)).collect()
-            } else {
-                let min_value = cmp::min(from.x, to.x);
-                let max_value = cmp::max(from.x, to.x);
-                (min_value..=max_value).map(|x| (x, from.y)).collect()
-            };
-
-            for (x, y) in points {
-                let count = marked.entry((x, y)).or_insert(0);
-                *count += 1;
-            }
-        }
-        marked.iter().filter(|(_, count)| count > &&1).count()
+        let mut marked: HashMap<Point, usize> = HashMap::new();
+        input
+            .iter()
+            .filter(|(from, to)| from.x == to.x || from.y == to.y)
+            .map(|(from, to)| from.points_between(to))
+            .flatten()
+            .for_each(|point| *marked.entry(point).or_insert(0) += 1);
+        marked.iter().filter(|(_, count)| **count > 1).count()
     }
 
     fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut marked: HashMap<(usize, usize), usize> = HashMap::new();
-        for (from, to) in input.iter() {
-            let points = if from.x == to.x && from.y == to.y {
-                vec![(from.x, from.y)]
-            } else if from.x == to.x {
-                let min_value = cmp::min(from.y, to.y);
-                let max_value = cmp::max(from.y, to.y);
-                (min_value..=max_value).map(|y| (from.x, y)).collect()
-            } else if from.y == to.y {
-                let min_value = cmp::min(from.x, to.x);
-                let max_value = cmp::max(from.x, to.x);
-                (min_value..=max_value).map(|x| (x, from.y)).collect()
-            } else {
-                // Diagonals
-                let mut points = vec![];
-                let mut current_point = (from.x, from.y);
-                loop {
-                    points.push(current_point);
-                    if current_point.0 == to.x {
-                        break;
-                    }
-                    if from.x < to.x {
-                        current_point.0 += 1;
-                    } else {
-                        current_point.0 -= 1;
-                    }
-                    if from.y < to.y {
-                        current_point.1 += 1;
-                    } else {
-                        current_point.1 -= 1;
-                    }
-                }
-                points
-            };
-
-            for (x, y) in points {
-                let count = marked.entry((x, y)).or_insert(0);
-                *count += 1;
-            }
-        }
-        marked.iter().filter(|(_, count)| count > &&1).count()
+        let mut marked: HashMap<Point, usize> = HashMap::new();
+        input
+            .iter()
+            .map(|(from, to)| from.points_between(to))
+            .flatten()
+            .for_each(|point| *marked.entry(point).or_insert(0) += 1);
+        marked.iter().filter(|(_, count)| **count > 1).count()
     }
 }
