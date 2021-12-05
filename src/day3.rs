@@ -8,7 +8,10 @@ impl crate::aoc::AoCSolution for Day3 {
     const DAY: usize = 3;
 
     fn convert(&self, input: &str) -> Vec<Vec<bool>> {
-        input.lines().map(|x| x.chars().map(|x| x == '1').collect()).collect()
+        input
+            .lines()
+            .map(|x| x.chars().map(|x| x == '1').collect())
+            .collect()
     }
 
     fn part1(&self, input: &Vec<Vec<bool>>) -> u32 {
@@ -43,26 +46,30 @@ impl crate::aoc::AoCSolution for Day3 {
 
             for column in 0..input[0].len() {
                 if input.len() == 1 {
-                    break
+                    break;
                 }
 
                 let ones = input.iter().filter(|value| value[column]).count();
 
                 let zeros = input.len() - ones;
 
-                let filter_value = if (most_common && zeros <= ones) || (!most_common && zeros > ones) {
-                    true
-                } else {
-                    false
-                };
+                let filter_value =
+                    if (most_common && zeros <= ones) || (!most_common && zeros > ones) {
+                        true
+                    } else {
+                        false
+                    };
 
                 input.retain(|x| x[column] == filter_value);
             }
 
-            let result_str: String = input[0].iter().map(|x| match x {
-                true => '1',
-                false => '0',
-            }).collect();
+            let result_str: String = input[0]
+                .iter()
+                .map(|x| match x {
+                    true => '1',
+                    false => '0',
+                })
+                .collect();
             return u32::from_str_radix(&result_str, 2).unwrap();
         }
 
