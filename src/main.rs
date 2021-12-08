@@ -1,3 +1,5 @@
+#![feature(hash_drain_filter)]
+
 #[macro_use]
 extern crate lazy_static;
 
@@ -9,6 +11,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 use aoc::AoCSolution;
 
@@ -19,5 +22,6 @@ fn main() {
     // day4::Day4::run();
     // day5::Day5::run();
     // day6::Day6::run();
-    day7::Day7::run();
+    // day7::Day7::run();
+    day8::Day8::run();
 }
