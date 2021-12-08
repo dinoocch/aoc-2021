@@ -15,9 +15,23 @@ impl FromStr for Line {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (signals, outputs) = s.split_once(" | ").unwrap();
-        let signals = signals.split_whitespace().map(|x| x.to_owned()).collect();
-        let outputs = outputs.split_whitespace().map(|x| x.to_owned()).collect();
-        return Ok(Line { signals, outputs });
+        let signals = signals
+            .split_whitespace()
+            .map(|x| {
+                let mut chars: Vec<char> = x.chars().collect();
+                chars.sort_unstable();
+                chars.iter().collect::<String>()
+            })
+            .collect();
+        let outputs = outputs
+            .split_whitespace()
+            .map(|x| {
+                let mut chars: Vec<char> = x.chars().collect();
+                chars.sort_unstable();
+                chars.iter().collect::<String>()
+            })
+            .collect();
+        Ok(Line { signals, outputs })
     }
 }
 
@@ -30,7 +44,7 @@ impl crate::aoc::AoCSolution for Day8 {
     fn convert(&self, input: &str) -> Self::ConvertedType {
         input
             .lines()
-            .map(|x| Line::from_str(x))
+            .map(Line::from_str)
             .filter_map(Result::ok)
             .collect()
     }
@@ -52,46 +66,42 @@ impl crate::aoc::AoCSolution for Day8 {
             .iter()
             .map(|line| {
                 let mut values = [""; 10];
-                values[1] = line.signals.iter().filter(|x| x.len() == 2).next().unwrap();
-                values[7] = line.signals.iter().filter(|x| x.len() == 3).next().unwrap();
-                values[4] = line.signals.iter().filter(|x| x.len() == 4).next().unwrap();
-                values[8] = line.signals.iter().filter(|x| x.len() == 7).next().unwrap();
+                values[1] = line.signals.iter().find(|x| x.len() == 2).unwrap();
+                values[7] = line.signals.iter().find(|x| x.len() == 3).unwrap();
+                values[4] = line.signals.iter().find(|x| x.len() == 4).unwrap();
+                values[8] = line.signals.iter().find(|x| x.len() == 7).unwrap();
                 values[9] = line
                     .signals
                     .iter()
-                    .filter(|x| x.len() == 6 && values[4].chars().all(|c| x.contains(c)))
-                    .next()
+                    .find(|x| x.len() == 6 && values[4].chars().all(|c| x.contains(c)))
                     .unwrap();
                 values[6] = line
                     .signals
                     .iter()
-                    .filter(|x| {
-                        &**x != values[9]
+                    .find(|x| {
+                        **x != values[9]
                             && x.len() == 6
                             && !values[1].chars().all(|c| x.contains(c))
                     })
-                    .next()
                     .unwrap();
                 values[3] = line
                     .signals
                     .iter()
-                    .filter(|x| {
+                    .find(|x| {
                         !values.iter().any(|v| v == x)
                             && x.len() == 5
                             && values[1].chars().all(|c| x.contains(c))
                     })
-                    .next()
                     .unwrap();
                 values[0] = line
                     .signals
                     .iter()
-                    .filter(|x| !values.iter().any(|v| v == x) && x.len() == 6)
-                    .next()
+                    .find(|x| !values.iter().any(|v| v == x) && x.len() == 6)
                     .unwrap();
                 values[5] = line
                     .signals
                     .iter()
-                    .filter(|x| {
+                    .find(|x| {
                         !values.iter().any(|v| v == x)
                             && values[6].chars().fold(0, |missing, v| {
                                 if x.contains(v) {
@@ -101,43 +111,20 @@ impl crate::aoc::AoCSolution for Day8 {
                                 }
                             }) == 1
                     })
-                    .next()
                     .unwrap();
                 values[2] = line
                     .signals
                     .iter()
-                    .filter(|x| !values.iter().any(|v| v == x))
-                    .next()
+                    .find(|x| !values.iter().any(|v| v == x))
                     .unwrap();
-                let sorted_value_strings: Vec<String> = values
-                    .iter()
-                    .map(|value| {
-                        let mut chars: Vec<_> = value.chars().collect();
-                        chars.sort();
-                        chars.iter().collect::<String>()
-                    })
-                    .collect();
-                let sorted_output_strings: Vec<String> = line
-                    .outputs
-                    .iter()
-                    .map(|value| {
-                        let mut chars: Vec<_> = value.chars().collect();
-                        chars.sort();
-                        chars.iter().collect::<String>()
-                    })
-                    .collect();
                 let output: Vec<usize> = line
                     .outputs
                     .iter()
                     .map(|output| {
-                        let mut chars: Vec<_> = output.chars().collect();
-                        chars.sort();
-                        let sorted_output: String = chars.iter().collect();
-
-                        sorted_value_strings
+                        values
                             .iter()
                             .enumerate()
-                            .filter(|(_, v)| &sorted_output == *v)
+                            .filter(|(_, v)| output == *v)
                             .map(|(index, _)| index)
                             .next()
                             .unwrap()
