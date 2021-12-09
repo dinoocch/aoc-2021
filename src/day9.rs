@@ -66,11 +66,12 @@ impl crate::aoc::AoCSolution for Day9 {
                 }
 
                 let mut basin_points = HashSet::new();
+                let mut to_consider = HashSet::new();
                 basin_points.insert((row, column));
+                to_consider.insert((row, column));
                 loop {
                     let mut added = HashSet::new();
-                    for (x, y) in &basin_points {
-                        let (x, y) = (*x, *y);
+                    for (x, y) in to_consider.drain() {
                         if y + 1 < input[x].len() && input[x][y+1] < 9 && !basin_points.contains(&(x, y+1)) {
                             added.insert((x, y+1));
                         }
@@ -87,7 +88,8 @@ impl crate::aoc::AoCSolution for Day9 {
                     if added.len() == 0 {
                         break;
                     }
-                    basin_points.extend(added);
+                    basin_points.extend(&added);
+                    to_consider.extend(&added);
                 }
                 basin_sizes.push(basin_points.len() as u32);
             }
