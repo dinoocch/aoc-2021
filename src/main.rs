@@ -12,6 +12,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 use aoc::AoCSolution;
 
@@ -23,5 +24,6 @@ fn main() {
     // day5::Day5::run();
     // day6::Day6::run();
     // day7::Day7::run();
-    day8::Day8::run();
+    // day8::Day8::run();
+    day9::Day9::run();
 }
