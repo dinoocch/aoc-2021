@@ -5,6 +5,7 @@ extern crate lazy_static;
 
 mod aoc;
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -25,5 +26,6 @@ fn main() {
     // day6::Day6::run();
     // day7::Day7::run();
     // day8::Day8::run();
-    day9::Day9::run();
+    // day9::Day9::run();
+    day10::Day10::run();
 }

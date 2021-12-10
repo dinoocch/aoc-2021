@@ -8,16 +8,16 @@ fn low_points(input: &Vec<Vec<u32>>) -> Vec<(usize, usize)> {
     for row in 0..input.len() {
         for column in 0..input[row].len() {
             let mut low_point = true;
-            if column + 1 < input[row].len() && input[row][column] >= input[row][column+1] {
+            if column + 1 < input[row].len() && input[row][column] >= input[row][column + 1] {
                 low_point = false;
             }
-            if column > 0 && input[row][column] >= input[row][column-1] {
+            if column > 0 && input[row][column] >= input[row][column - 1] {
                 low_point = false;
             }
-            if row > 0 && input[row][column] >= input[row-1][column] {
+            if row > 0 && input[row][column] >= input[row - 1][column] {
                 low_point = false;
             }
-            if row + 1 < input.len() && input[row][column] >= input[row+1][column] {
+            if row + 1 < input.len() && input[row][column] >= input[row + 1][column] {
                 low_point = false;
             }
 
@@ -29,7 +29,6 @@ fn low_points(input: &Vec<Vec<u32>>) -> Vec<(usize, usize)> {
     low_points
 }
 
-
 impl crate::aoc::AoCSolution for Day9 {
     type ConvertedType = Vec<Vec<u32>>;
     type ReturnType = u32;
@@ -39,12 +38,19 @@ impl crate::aoc::AoCSolution for Day9 {
     fn convert(&self, input: &str) -> Self::ConvertedType {
         input
             .lines()
-            .map(|x| x.chars().map(|height| height.to_digit(10).unwrap()).collect::<Vec<u32>>())
+            .map(|x| {
+                x.chars()
+                    .map(|height| height.to_digit(10).unwrap())
+                    .collect::<Vec<u32>>()
+            })
             .collect()
     }
 
     fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        low_points(input).iter().map(|(x, y)| input[*x][*y] + 1).sum()
+        low_points(input)
+            .iter()
+            .map(|(x, y)| input[*x][*y] + 1)
+            .sum()
     }
 
     fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType {
@@ -60,17 +66,23 @@ impl crate::aoc::AoCSolution for Day9 {
             loop {
                 let mut added = HashSet::new();
                 for (x, y) in to_consider.drain() {
-                    if y + 1 < input[x].len() && input[x][y+1] < 9 && !basin_points.contains(&(x, y+1)) {
-                        added.insert((x, y+1));
+                    if y + 1 < input[x].len()
+                        && input[x][y + 1] < 9
+                        && !basin_points.contains(&(x, y + 1))
+                    {
+                        added.insert((x, y + 1));
                     }
-                    if y > 0 && input[x][y-1] < 9 && !basin_points.contains(&(x, y-1)){
-                        added.insert((x, y-1));
+                    if y > 0 && input[x][y - 1] < 9 && !basin_points.contains(&(x, y - 1)) {
+                        added.insert((x, y - 1));
                     }
-                    if x > 0 && input[x-1][y] < 9 && !basin_points.contains(&(x-1, y)){
-                        added.insert((x-1, y));
+                    if x > 0 && input[x - 1][y] < 9 && !basin_points.contains(&(x - 1, y)) {
+                        added.insert((x - 1, y));
                     }
-                    if x + 1 < input.len() && input[x+1][y] < 9 && !basin_points.contains(&(x+1, y)) {
-                        added.insert((x+1, y));
+                    if x + 1 < input.len()
+                        && input[x + 1][y] < 9
+                        && !basin_points.contains(&(x + 1, y))
+                    {
+                        added.insert((x + 1, y));
                     }
                 }
                 if added.len() == 0 {
