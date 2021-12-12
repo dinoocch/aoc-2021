@@ -4,113 +4,98 @@ use std::collections::HashSet;
 #[derive(Default)]
 pub struct Day12 {}
 
-impl crate::aoc::AoCSolution for Day12 {
-    type ConvertedType = Vec<(String, String)>;
-    type ReturnType = u64;
+#[derive(Default, Debug, Clone, Copy)]
+pub struct Node {
+    is_small: bool,
+}
 
-    const DAY: usize = 12;
+pub struct Graph<'a> {
+    edges: HashMap<&'a str, HashSet<&'a str>>,
+    nodes: HashMap<&'a str, Node>,
+}
 
-    fn convert(&self, input: &str) -> Self::ConvertedType {
+#[derive(Debug, Clone)]
+struct Visited<'a> {
+    last_node: &'a str,
+    seen: HashSet<&'a str>,
+    can_revisit_small: bool,
+}
+
+fn is_small_cave(name: &str) -> bool {
+    name.chars().all(|c| c.is_lowercase())
+}
+
+impl<'a> Graph<'a> {
+    fn from_input(input: &'a str) -> Graph<'a> {
+        let mut nodes = HashMap::new();
+        let mut edges = HashMap::new();
         input
             .lines()
             .map(|line| line.split_once("-"))
             .flatten()
-            .map(|(a, b)| (a.to_owned(), b.to_owned()))
-            .collect()
+            .for_each(|(a, b)| {
+                nodes.insert(
+                    a,
+                    Node {
+                        is_small: is_small_cave(a),
+                    },
+                );
+                nodes.insert(
+                    b,
+                    Node {
+                        is_small: is_small_cave(b),
+                    },
+                );
+
+                (*edges.entry(a).or_insert_with(HashSet::new)).insert(b);
+                (*edges.entry(b).or_insert_with(HashSet::new)).insert(a);
+            });
+        Graph { edges, nodes }
     }
 
-    fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut nodes: HashMap<String, HashSet<String>> = HashMap::new();
-        for (a, b) in input.iter() {
-            {
-                let node_a = nodes.entry(a.to_string()).or_insert(HashSet::new());
-                (*node_a).insert(b.to_string());
-            }
-            let node_b = nodes.entry(b.to_string()).or_insert(HashSet::new());
-            (*node_b).insert(a.to_string());
-        }
+    fn paths(&self, can_revisit_small: bool) -> u64 {
+        let mut seen = HashSet::new();
+        seen.insert("start");
+
+        let mut current = vec![Visited {
+            last_node: "start",
+            seen,
+            can_revisit_small,
+        }];
 
         let mut paths = 0;
-        let mut current = vec![vec!["start".to_string()]];
         loop {
-            // Generate all the paths for each value in current
             if current.len() == 0 {
                 break;
             }
-            let mut next: Vec<Vec<String>> = Vec::new();
-            for value in current.iter_mut() {
-                let last_node = &value[value.len() - 1];
-                if last_node == "end" {
+            let mut next: Vec<Visited> = Vec::new();
+            for current_path in current.iter() {
+                if current_path.last_node == "end" {
                     paths += 1;
                     continue;
                 }
-                let mut visited_small: HashSet<String> = HashSet::new();
-                for visited in value.iter() {
-                    if small_cave(visited) {
-                        visited_small.insert(visited.to_string());
-                    }
-                }
-                for neighbor in nodes.get(last_node).unwrap().iter() {
-                    if small_cave(neighbor) && visited_small.contains(neighbor) {
+
+                for neighbor in self.edges.get(current_path.last_node).unwrap().iter() {
+                    if *neighbor == "start" {
                         continue;
                     }
-                    let mut new_vec: Vec<String> =
-                        Vec::from_iter(value.iter().map(|x| x.to_string()));
-                    new_vec.push(neighbor.to_string());
-                    next.push(new_vec);
-                }
-            }
-            current = next;
-        }
-        paths
-    }
-
-    fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut nodes: HashMap<String, HashSet<String>> = HashMap::new();
-        for (a, b) in input.iter() {
-            {
-                let node_a = nodes.entry(a.to_string()).or_insert(HashSet::new());
-                (*node_a).insert(b.to_string());
-            }
-            let node_b = nodes.entry(b.to_string()).or_insert(HashSet::new());
-            (*node_b).insert(a.to_string());
-        }
-
-        let mut paths = 0;
-        let mut current = vec![(vec!["start".to_string()], true)];
-        loop {
-            // Generate all the paths for each value in current
-            if current.len() == 0 {
-                break;
-            }
-            let mut next: Vec<(Vec<String>, bool)> = Vec::new();
-            for value in current.iter_mut() {
-                let last_node = &value.0[value.0.len() - 1];
-                if last_node == "end" {
-                    paths += 1;
-                    continue;
-                }
-                let mut visited_small: HashSet<String> = HashSet::new();
-                for visited in value.0.iter() {
-                    if small_cave(visited) {
-                        visited_small.insert(visited.to_string());
-                    }
-                }
-                for neighbor in nodes.get(last_node).unwrap().iter() {
-                    if neighbor == "start" {
-                        continue;
-                    }
-                    let mut can_repeat = value.1;
-                    if small_cave(neighbor) && visited_small.contains(neighbor) {
-                        if !value.1 {
+                    let mut can_revisit = current_path.can_revisit_small;
+                    if self.nodes.get(neighbor).unwrap().is_small
+                        && current_path.seen.contains(neighbor)
+                    {
+                        if !can_revisit {
                             continue;
                         }
-                        can_repeat = false;
+                        can_revisit = false;
                     }
-                    let mut new_vec: Vec<String> =
-                        Vec::from_iter(value.0.iter().map(|x| x.to_string()));
-                    new_vec.push(neighbor.to_string());
-                    next.push((new_vec, can_repeat));
+                    // idk how to remove this clone :/
+                    let mut next_seen = current_path.seen.clone();
+                    next_seen.insert(neighbor);
+                    next.push(Visited {
+                        last_node: neighbor,
+                        seen: next_seen,
+                        can_revisit_small: can_revisit,
+                    });
                 }
             }
             current = next;
@@ -119,6 +104,25 @@ impl crate::aoc::AoCSolution for Day12 {
     }
 }
 
-fn small_cave(name: &str) -> bool {
-    name.chars().all(|c| c.is_lowercase())
+impl crate::aoc::AoCSolution for Day12 {
+    type ConvertedType = String;
+    type ReturnType = u64;
+
+    const DAY: usize = 12;
+
+    fn convert(&self, input: &str) -> Self::ConvertedType {
+        input.to_owned()
+    }
+
+    fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType {
+        // The lifetime is annoying so eat the cost twice
+        let graph = Graph::from_input(input);
+        graph.paths(false)
+    }
+
+    fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType {
+        // The lifetime is annoying so eat the cost twice
+        let graph = Graph::from_input(input);
+        graph.paths(true)
+    }
 }
