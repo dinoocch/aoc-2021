@@ -43,27 +43,22 @@ impl crate::aoc::AoCSolution for Day13 {
     }
 
     fn part1(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut points = input.points.clone();
-        for fold in &input.folds {
-            points = match fold {
-                Fold::Left(fold) => fold_left(&points, *fold),
-                Fold::Up(fold) => fold_up(&points, *fold),
-            };
-            return points.len();
+        match input.folds[0] {
+            Fold::Left(fold) => fold_left(&input.points, fold).len(),
+            Fold::Up(fold) => fold_up(&input.points, fold).len(),
         }
-        unreachable!();
     }
 
     fn part2(&self, input: &Self::ConvertedType) -> Self::ReturnType {
-        let mut points = input.points.clone();
-        for fold in &input.folds {
-            // print_points(&points);
-            points = match fold {
-                Fold::Left(fold) => fold_left(&points, *fold),
-                Fold::Up(fold) => fold_up(&points, *fold),
-            };
-        }
-        print_points(&points);
+        print_points(
+            &input
+                .folds
+                .iter()
+                .fold(input.points.clone(), |points, fold| match fold {
+                    Fold::Left(fold) => fold_left(&points, *fold),
+                    Fold::Up(fold) => fold_up(&points, *fold),
+                }),
+        );
         42
     }
 }
