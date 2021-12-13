@@ -8,6 +8,7 @@ mod day1;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod day2;
 mod day3;
 mod day4;
@@ -20,14 +21,5 @@ mod day9;
 use aoc::AoCSolution;
 
 fn main() {
-    // day1::Day1 {}.run();
-    // day2::Day2::run();
-    // day3::Day3::run();
-    // day4::Day4::run();
-    // day5::Day5::run();
-    // day6::Day6::run();
-    // day7::Day7::run();
-    // day8::Day8::run();
-    // day9::Day9::run();
-    day12::Day12::run();
+    day13::Day13::run();
 }
